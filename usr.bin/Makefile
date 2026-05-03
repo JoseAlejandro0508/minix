@@ -37,6 +37,7 @@ SUBDIR= asa \
 
 SUBDIR+= tree
 
+SUBDIR+= PlanificadorTest
 .if !defined(__MINIX)
 SUBDIR+= ../external/zlib/pigz/bin/pigz
 .endif # defined(__MINIX)
