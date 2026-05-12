@@ -4,11 +4,11 @@
 #include <sys/types.h>
 #include <string.h>
 
-long TotalSize=0;
-long TotalSubdirectories=0;
-long TotalFiles=0;
+long TotalSize = 0;
+long TotalSubdirectories = 0;
+long TotalFiles = 0;
 
-int tree(const char *path, const char *identation); // ← AÑADIDO
+int tree(const char *path, const char *identation);
 
 int tree(const char *path, const char *identation)
 {
@@ -25,31 +25,43 @@ int tree(const char *path, const char *identation)
 
     while ((entry = readdir(dp)))
     {
-        if (strcmp(entry->d_name,".")==0 || strcmp(entry->d_name,"..")==0)
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
             continue;
 
         char fullpath[1024];
         snprintf(fullpath, sizeof(fullpath), "%s/%s", path, entry->d_name);
 
-        if (stat(fullpath, &info) == -1)
+        // ✅ CORRECCIÓN: Usar lstat() para NO seguir enlaces
+        if (lstat(fullpath, &info) == -1)
         {
-            perror("stat");
+            perror("lstat");
             continue;
         }
 
+        // ✅ Verificar si es enlace simbólico
+        if (S_ISLNK(info.st_mode))
+        {
+            // Es enlace simbólico, mostrarlo pero NO entrar
+            printf("%s%s [symlink]\n", identation, entry->d_name);
+            TotalFiles++;  // Contar como archivo (o podrías tener contador separado)
+            // ✅ IMPORTANTE: NO llamar a tree() aquí
+            continue;
+        }
+
+        // Si es directorio regular (NO enlace)
         if (S_ISDIR(info.st_mode))
         {
-            TotalSubdirectories=TotalSubdirectories+1;
+            TotalSubdirectories++;
             char NewIdentation[1024];
             snprintf(NewIdentation, sizeof(NewIdentation), "%s  ", identation);
             printf("%s/%s\n", identation, entry->d_name);
-            tree(fullpath, NewIdentation);
+            tree(fullpath, NewIdentation);  // ✅ Seguro: es directorio real
         }
         else
         {
-            TotalFiles=TotalFiles+1;
-            TotalSize=TotalSize+info.st_size;
-            printf("%s%s ---- %lld b\n", identation, entry->d_name, (long long)info.st_size); // ← CAMBIADO
+            TotalFiles++;
+            TotalSize = TotalSize + info.st_size;
+            printf("%s%s ---- %lld b\n", identation, entry->d_name, (long long)info.st_size);
         }
     }
 
@@ -59,7 +71,7 @@ int tree(const char *path, const char *identation)
 
 int main(int argc, char *argv[])
 {
-    const char *path; // ← CAMBIADO
+    const char *path;
 
     if (argc < 2)
         path = ".";
@@ -68,6 +80,7 @@ int main(int argc, char *argv[])
 
     printf("Explorando ... [%s]\n", path);
     tree(path, "  ");
-    printf("[Total Size: %lld B]\n[Subdirectories: %ld]\n[Files: %ld]\n", (long long)TotalSize, TotalSubdirectories, TotalFiles); // ← CAMBIADO
+    printf("[Total Size: %lld B]\n[Subdirectories: %ld]\n[Files: %ld]\n", 
+           (long long)TotalSize, TotalSubdirectories, TotalFiles);
     return 0;
 }
