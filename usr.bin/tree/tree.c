@@ -31,20 +31,20 @@ int tree(const char *path, const char *identation)
         char fullpath[1024];
         snprintf(fullpath, sizeof(fullpath), "%s/%s", path, entry->d_name);
 
-        // ✅ CORRECCIÓN: Usar lstat() para NO seguir enlaces
+        // Usar lstat() para NO seguir enlaces
         if (lstat(fullpath, &info) == -1)
         {
             perror("lstat");
             continue;
         }
 
-        // ✅ Verificar si es enlace simbólico
+        // Verificar si es enlace simbólico
         if (S_ISLNK(info.st_mode))
         {
             // Es enlace simbólico, mostrarlo pero NO entrar
             printf("%s%s [symlink]\n", identation, entry->d_name);
             TotalFiles++;  // Contar como archivo (o podrías tener contador separado)
-            // ✅ IMPORTANTE: NO llamar a tree() aquí
+            // IMPORTANTE: NO llamar a tree() aquí
             continue;
         }
 
@@ -55,7 +55,7 @@ int tree(const char *path, const char *identation)
             char NewIdentation[1024];
             snprintf(NewIdentation, sizeof(NewIdentation), "%s  ", identation);
             printf("%s/%s\n", identation, entry->d_name);
-            tree(fullpath, NewIdentation);  // ✅ Seguro: es directorio real
+            tree(fullpath, NewIdentation);  // Seguro: es directorio real
         }
         else
         {
