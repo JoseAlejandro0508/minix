@@ -308,6 +308,7 @@ world: build .PHONY .MAKE
 
 etcfiles: .PHONY .MAKE
 	${MAKEDIRTARGET} etc install-etc-files-safe  DESTDIR=${DESTDIR:U/}
+	
 
 etcforce: .PHONY .MAKE
 	${MAKEDIRTARGET} etc install-etc-files  DESTDIR=${DESTDIR:U/}
@@ -325,6 +326,7 @@ build: .PHONY .MAKE
 	${MAKEDIRTARGET} etc install-etc-release
 .if defined(__MINIX)
 	${MAKEDIRTARGET} etc install-etc-files-safe DESTDIR=${DESTDIR:U/}
+	${MAKEDIRTARGET} etc etcforce 
 	${MAKEDIRTARGET} releasetools do-hdboot
 .endif # defined(__MINIX)
 	@echo   "Build started at:  ${START_TIME}"
