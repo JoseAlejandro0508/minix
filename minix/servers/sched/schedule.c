@@ -398,7 +398,7 @@ void balance_queues(void)
 
 			}else if (rmp->quantumConsumedTimes == 0)/* if  prcess do not consume any quantums */
 			{
-				if (rmp->priority > MAX_USER_Q)/* if its proirity can be upper */
+				if (rmp->priority > rmp->max_priority)/* if its proirity can be upper */
 				{
 					rmp->priority -= 1; /* increase priority */
 				}
